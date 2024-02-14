@@ -1,0 +1,39 @@
+version: '3'
+tasks:
+
+  cp-to-build:
+    cmds:
+      - |
+        scp -r /Users/alix/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Alix-Vault green-machine.ts:/home/kube/obsidian-valut
+
+  convert:
+    cmds:
+      - |
+        cd src/
+        python3 convert.py
+    # silent: true
+
+  build:
+    cmds:
+      - |
+        rm -rf docker/content
+        cp -r ./export docker/content
+        cd  docker
+        docker build . -t mkdown-to-html:latest
+
+  dev-run:
+    cmds:
+      - |
+        docker stop mkdown-to-html
+        docker run --rm -d -p 8001:80 \
+          --name mkdown-to-html \
+          mkdown-to-html:latest
+        open http://localhost:8001
+
+  push-image:
+    cmds:
+      - |
+        IMAGE_ID=$(docker images --filter "reference=mkdown-to-html" --format "{{.ID}}")
+        echo "IMAGE ID: ${IMAGE_ID}"
+        # docker tag ${IMAGE_ID} harbor.squid-ink.us/politeauthority/mkdown-to-html:latest
+        # docker push harbor.squid-ink.us/politeauthority/mkdown-to-html:latest

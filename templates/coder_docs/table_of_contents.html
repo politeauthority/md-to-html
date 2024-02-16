@@ -1,0 +1,19 @@
+{% include "header.html" %}
+<article class="docs-article" id="section-9">
+    <header class="docs-header">
+        <h1 class="docs-heading">Table of Contents<span class="docs-time">Last updated: {{date_updated}}</span</h1>
+        {# <section class="docs-intro">
+            <p>Section intro goes here. You can list all your FAQs using the format below.</p>
+        </section><!--//docs-intro--> #}
+    </header>
+    <section class="docs-section" id="item-9-1">
+        <ul>
+        {%for phile in files%}
+            <li>
+                <a href="{{phile['relative_path']}}">{{phile["name"]}}</a>
+            </li>
+        {%endfor%}
+        </ul>
+    </section><!--//section-->
+</article><!--//docs-article-->
+{% include "footer.html" %}

@@ -1,0 +1,12 @@
+{% include "./header.html" %}
+<h1>Table of Contents</h1>
+
+<ul>
+
+{%for phile in files%}
+    <li>
+        <a href="{{phile['relative_path']}}">{{phile["name"]}}</a>
+    </li>
+{%endfor%}
+</ul>
+{% include "footer.html" %}

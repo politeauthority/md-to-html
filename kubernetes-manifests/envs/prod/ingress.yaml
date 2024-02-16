@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docs-public
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/upstream-vhost: $host
+spec:
+  ingressClassName: nginx-public
+  rules:
+  - host: docs.alix.lol
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: docs
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - docs.alix.lol
+    secretName: docs-alix-lol

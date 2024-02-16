@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: md-to-html
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: md-to-html
+  template:
+    metadata:
+      labels:
+        app: md-to-html
+    spec:
+      containers:
+      - name: md-to-html
+        image: harbor.squid-ink.us/politeauthority/md-to-html:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+        - name: harbor-registry

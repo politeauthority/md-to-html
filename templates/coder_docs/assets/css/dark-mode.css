@@ -1,0 +1,25 @@
+/*!
+*/  
+body {
+    background-color: #030303;
+
+    color: white;
+}
+
+.header {
+    background-color: black;
+}
+
+.site-logo .logo-text {
+    color: white;
+}
+.docs-article {
+    background-color: #343434;
+    color: #D7DADC
+}
+
+/* .dockes-article .h */
+
+h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
+    color: #D7DADC !important;
+}

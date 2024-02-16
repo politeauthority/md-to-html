@@ -1,0 +1,78 @@
+version: '3'
+tasks:
+
+  cp-vault-to-build:
+    cmds:
+      - |
+        scp -r /Users/alix/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Alix-Vault green-machine.ts:/home/kube/obsidian-valut
+
+  cp-src-to-build:
+    desc: "Copies Source and Taskfile to build box"
+    cmds:
+      - |
+        GLOBIGNORE='.git/'
+        scp -r /Users/alix/Programming/repos/md-to-html/src green-machine.ts:/home/kube/repos/md-to-html/
+        scp -r Taskfile.yaml green-machine.ts:/home/kube/repos/md-to-html/
+
+  cp-export-to-build:
+    cmds:
+      - |
+        GLOBIGNORE='.git/'
+        scp -r /Users/alix/Programming/repos/md-to-html/exports/ green-machine.ts:/home/kube/repos/md-to-html/exports
+
+  cp-build:
+    cmds:
+    - task: cp-vault-to-build
+    - task: cp-src-to-build
+
+  dev-deploy:
+    cmds:
+      - |
+        cd kubernetes-manifests/envs/dev
+        kustomize build . | kubectl apply -n docs-dev -f -
+
+  dev-cp:
+    cmds:
+      - |
+        python3 src/convert.py
+        POD=$(kubectl get pods -n docs-dev  -l app=md-to-html --no-headers --field-selector=status.phase=Running | cut -d' ' -f1)
+        echo $POD
+        kubectl cp -n docs-dev  exports/ ${POD}:/usr/share/nginx/exports
+        kubectl exec -n docs-dev -it ${POD} -- rm -rf /usr/share/nginx/html
+        kubectl exec -n docs-dev -it ${POD} -- mv /usr/share/nginx/exports /usr/share/nginx/html
+      - echo "Copied and Built!"
+    silent: True
+
+
+  prod-deploy:
+    cmds:
+      - |
+        cd kubernetes-manifests/envs/prod
+        kustomize build . | kubectl apply -n docs -f -
+
+  convert:
+    cmds:
+      - |
+        cd src/
+        python3 convert.py
+
+  build:
+    cmds:
+      - |
+        rm -rf docker/content
+        cp -r ./exports docker/content
+        cd  docker
+        docker build . -t md-to-html:{{.CLI_ARGS}}
+
+  push-image:
+    cmds:
+      - |
+        docker tag md-to-html:{{.CLI_ARGS}} harbor.squid-ink.us/politeauthority/md-to-html:{{.CLI_ARGS}}
+        docker push harbor.squid-ink.us/politeauthority/md-to-html:{{.CLI_ARGS}}
+
+  build-and-push:
+    tasks:
+    - convert
+    - build
+    - push-image
+

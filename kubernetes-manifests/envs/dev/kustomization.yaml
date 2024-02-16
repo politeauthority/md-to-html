@@ -9,4 +9,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: harbor.squid-ink.us/politeauthority/md-to-html:dev-0.0.1b
+        value: harbor.squid-ink.us/politeauthority/md-to-html:dev-0.0.1f

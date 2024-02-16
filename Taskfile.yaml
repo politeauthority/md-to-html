@@ -12,6 +12,7 @@ tasks:
       - |
         GLOBIGNORE='.git/'
         scp -r /Users/alix/Programming/repos/md-to-html/src green-machine.ts:/home/kube/repos/md-to-html/
+        scp -r templates green-machine.ts:/home/kube/repos/md-to-html/templates
         scp -r Taskfile.yaml green-machine.ts:/home/kube/repos/md-to-html/
 
   cp-export-to-build:
@@ -56,7 +57,7 @@ tasks:
         cd src/
         python3 convert.py
 
-  build:
+  image-build:
     cmds:
       - |
         rm -rf docker/content
@@ -64,15 +65,33 @@ tasks:
         cd  docker
         docker build . -t md-to-html:{{.CLI_ARGS}}
 
-  push-image:
+  image-push:
     cmds:
       - |
         docker tag md-to-html:{{.CLI_ARGS}} harbor.squid-ink.us/politeauthority/md-to-html:{{.CLI_ARGS}}
         docker push harbor.squid-ink.us/politeauthority/md-to-html:{{.CLI_ARGS}}
 
-  build-and-push:
-    tasks:
-    - convert
-    - build
-    - push-image
+  image-build-box:
+    cmds:
+    - task: image-build
+    - task: image-push
+
+  all:
+    cmds:
+    # - task: cp-vault-to-build
+    # - task: cp-src-to-build
+    - |
+      echo -n > "cd /home/kube/repos/md-to-html\n" > local_script.sh
+      echo "task image-push --  dev-0.0.1g" >> local_script.sh
+      chmod +x local_script.sh
+
+      ssh green-machine.ts \
+      'bash -s' < local_script.sh
+      #   cd /home/kube/repos/md-to-html & task image-build -- dev-0.0.1g
+      # ssh green-machine.ts \
+      #   cd /home/kube/repos/md-to-html &&
+      #   task image-push --  dev-0.0.1g
+  # - task: convert
+  # - task: image-build
+  # - task: image-push
 

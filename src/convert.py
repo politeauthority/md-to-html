@@ -3,9 +3,8 @@
 """
 
 import os
-import yaml
 
-import jinja2
+import yaml
 
 from modules import misc
 from modules.export_markdown import ExportMarkdown
@@ -18,9 +17,7 @@ class Convert:
     def __init__(self):
         self.load_config()
         self.md_files = {}
-        self.environment = jinja2.Environment(
-            loader=jinja2.FileSystemLoader("../templates/")
-        )
+        self.export_structure = {}
 
     def load_config(self):
         """Read the local configiuration yaml file."""
@@ -47,7 +44,9 @@ class Convert:
                     total_files += 1
                     relative_path =  self._get_valut_relative_path(full_path)
                     if self.config["files"]["vaultRoot"]:
-                        export_relative = relative_path.replace(self.config["files"]["vaultRoot"] + "/", "")
+                        export_relative = relative_path.replace(
+                            self.config["files"]["vaultRoot"] + "/",
+                            "")
                         export_path = os.path.join(
                             self.config["export"]["path"],
                             export_relative
@@ -67,6 +66,7 @@ class Convert:
                         "export_relative": export_relative,
                         "full_path": full_path
                     }
+                    # self.export_structure[export_path] = self.md_files[relative_path]
         print("Total Markdown: %s" % total_files)
         return True
 
@@ -88,14 +88,28 @@ class Convert:
         vault_root = self.config["files"]["vaultRoot"]
         print("Using Vault Root: %s" % vault_root)
         new_files = {}
+        export_files = {}
         incl_rel_path_len = len(vault_root)
-
         for relative_path, phile_info in self.md_files.items():
             os.path.join(self.config["obdisianPath"], vault_root)
             inc_path = os.path.join(self.config["obdisianPath"], vault_root)
             incl_path_len = len(inc_path)
             if phile_info["full_path"][:incl_path_len] == inc_path:
                 new_files[relative_path] = phile_info
+                phile_dirs = os.path.dirname(phile_info["export_relative"])
+                if "/" in phile_dirs:
+                    phile_dirs = phile_dirs.split("/")
+                else:
+                    if phile_dirs == "":
+                        continue
+                    phile_dirs = [phile_dirs]
+                for phile_dir in phile_dirs:
+                    if phile_dir not in export_files:
+                        export_files[phile_dir] = {}
+                    export_files[phile_dir] = phile_info
+
+                # export_files[os.path.dirname(phile_info["export_relative"])
+                # export_files[phile_info[relative_path]] = self.md_files[relative_path]
         self.md_files = new_files
         print("Total Files to Export: %s" % len(new_files))
         return True
@@ -121,5 +135,11 @@ class Convert:
          relative_path = full_path.replace(replace_str, "")
          return relative_path
 
+
+def test():
+    translated = "x"
+    translated = misc.handle_obsidian_check_boxes(translated)
+
 if __name__ == "__main__":
-    Convert().run()
+    test()
+    # Convert().run()

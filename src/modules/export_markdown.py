@@ -31,6 +31,7 @@ class ExportMarkdown:
 
     def clean_export_path(self) -> bool:
         """Clear the export directory.
+
         """
         the_path = self.config["export"]["path"]
         if not os.path.exists(the_path):
@@ -48,15 +49,19 @@ class ExportMarkdown:
         the_content = self.translate_md_to_html(the_file)
         
         if self.config["files"]["vaultRoot"]:
-            asset_path = "assets"
+            asset_path = misc.asset_path(file_info["export_relative"])
+            index_path = misc.index_path(file_info["export_relative"])
         else:
             asset_path = misc.asset_path(file_info["relative_path"])
+            index_path = misc.index_path(file_info["relative_path"])
 
         data = {
             "title": misc.filter_md_ext(file_info["name"]),
             "content": the_content,
             "date_updated": misc.get_date_updated(),
-            "asset_path": asset_path
+            "date_generated": misc.get_date_generated(),
+            "asset_path": asset_path,
+            "index_path": index_path
         }
         phile_content = template.render(**data)
         self.write_file(file_info, phile_content)
@@ -64,11 +69,17 @@ class ExportMarkdown:
 
     def translate_md_to_html(self, raw_markdown: str) -> str:
         """Translates a markdown file to html.
-        # @todo: fix relative links and pre tags
+        @todo: fix relative links and pre tags
         """
         translated = raw_markdown
         # translated_md = misc.handle_md_html_pre_tags(raw_markdown)
-        # translated = misc.handle_obsidian_anchors(raw_markdown)
+        # if "## Check Boxes" in raw_markdown:
+        #     import ipdb; ipdb.set_trace()
+        translated = misc.handle_obsidian_anchors(translated)
+        translated = misc.handle_backticks(translated)
+        translated = misc.handle_obsidain_code_blocks(translated)
+        translated = misc.handle_obsidian_check_boxes(translated)
+        # translated = misc.handle_obsidian_line_breaks(translated)
         return markdown.markdown(translated)
 
     def write_file(self, phile_info: dict, phile_content:str) -> bool:

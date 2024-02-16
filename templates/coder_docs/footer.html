@@ -1,16 +1,20 @@
-			    <footer class="footer">
+{# 
+    Coder Docs
+    footer.html
+#}			    
+<footer class="footer">
 				    <div class="container text-center py-5">
-				
-			            <small class="copyright">Powered with <span class="sr-only">love</span><i class="fas fa-heart" style="color: #fb866a;"></i> by <a class="theme-link" href="http://github.com/politeauthority/md-to-html" target="_blank">Markdown to Html</a></small>
-				        <ul class="social-list list-unstyled pt-4 mb-0">
-                            <li class="list-inline-item"><a href="#"><i class="fab fa-github fa-fw"></i></a></li>
-						    <li class="list-inline-item"><a href="#"><i class="fab fa-github fa-fw"></i></a></li> 
-				            <li class="list-inline-item"><a href="#"><i class="fab fa-twitter fa-fw"></i></a></li>
-				            <li class="list-inline-item"><a href="#"><i class="fab fa-slack fa-fw"></i></a></li>
-				            <li class="list-inline-item"><a href="#"><i class="fab fa-product-hunt fa-fw"></i></a></li>
-				            <li class="list-inline-item"><a href="#"><i class="fab fa-facebook-f fa-fw"></i></a></li>
-				            <li class="list-inline-item"><a href="#"><i class="fab fa-instagram fa-fw"></i></a></li>
-				        </ul><!--//social-list-->
+			            <small class="copyright">
+                            Powered with <span class="sr-only">love</span>
+                            <i class="fas fa-heart" style="color: #fb866a;"></i> by 
+                            <a href="http://github.com/politeauthority/md-to-html" target="_blank">
+                                <i class="fab fa-github fa-fw"></i>Markdown to Html
+                            </a>
+                        </small>
+                        <br/>
+                        <small>
+                            Generated on {{date_generated}}
+                        </small>
 				    </div>
 			    </footer>
 		    </div><!-- docs-content -->
@@ -18,16 +22,15 @@
     </div><!--//docs-wrapper-->
    
     <!-- Javascript -->          
-    <script src="assets/plugins/popper.min.js"></script>
-    <script src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>  
-    
+    <script src="{{asset_path}}/plugins/popper.min.js"></script>
+    <script src="{{asset_path}}/plugins/bootstrap/js/bootstrap.min.js"></script>  
     
     <!-- Page Specific JS -->
-    <script src="assets/plugins/smoothscroll.min.js"></script>
+    <script src="{{asset_path}}/plugins/smoothscroll.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.8/highlight.min.js"></script>
-    <script src="assets/js/highlight-custom.js"></script> 
-    <script src="assets/plugins/simplelightbox/simple-lightbox.min.js"></script>      
-    <script src="assets/plugins/gumshoe/gumshoe.polyfills.min.js"></script> 
-    <script src="assets/js/docs.js"></script> 
+    <script src="{{asset_path}}/js/highlight-custom.js"></script> 
+    <script src="{{asset_path}}/plugins/simplelightbox/simple-lightbox.min.js"></script>      
+    <script src="{{asset_path}}/plugins/gumshoe/gumshoe.polyfills.min.js"></script> 
+    <script src="{{asset_path}}/js/docs.js"></script> 
 </body>
 </html>

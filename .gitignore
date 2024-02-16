@@ -1,4 +1,6 @@
 # Git Ignore
+data/
+docker/content
 configs/
 exports/
 .DS_Store

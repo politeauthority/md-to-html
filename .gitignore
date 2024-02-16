@@ -3,6 +3,7 @@ data/
 docker/content
 configs/
 exports/
+src/debug.py
 .DS_Store
 
 # Byte-compiled / optimized / DLL files

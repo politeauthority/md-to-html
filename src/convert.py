@@ -141,5 +141,5 @@ def test():
     translated = misc.handle_obsidian_check_boxes(translated)
 
 if __name__ == "__main__":
-    test()
-    # Convert().run()
+    # test()
+    Convert().run()

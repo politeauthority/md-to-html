@@ -8,6 +8,7 @@ import jinja2
 import markdown
 
 from . import misc
+from . import obsidian_parser
 
 
 class ExportMarkdown:
@@ -75,10 +76,10 @@ class ExportMarkdown:
         # translated_md = misc.handle_md_html_pre_tags(raw_markdown)
         # if "## Check Boxes" in raw_markdown:
         #     import ipdb; ipdb.set_trace()
-        translated = misc.handle_obsidian_anchors(translated)
-        translated = misc.handle_backticks(translated)
-        translated = misc.handle_obsidain_code_blocks(translated)
-        translated = misc.handle_obsidian_check_boxes(translated)
+        translated = obsidian_parser.parse_anchors(translated)
+        translated = obsidian_parser.parse_backticks(translated)
+        # translated = misc.handle_obsidain_code_blocks(translated)
+        # translated = misc.handle_obsidian_check_boxes(translated)
         # translated = misc.handle_obsidian_line_breaks(translated)
         return markdown.markdown(translated)
 

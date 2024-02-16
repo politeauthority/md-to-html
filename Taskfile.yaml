@@ -40,7 +40,7 @@ tasks:
         kubectl cp -n docs-dev  exports/ ${POD}:/usr/share/nginx/exports
         kubectl exec -n docs-dev -it ${POD} -- rm -rf /usr/share/nginx/html
         kubectl exec -n docs-dev -it ${POD} -- mv /usr/share/nginx/exports /usr/share/nginx/html
-      - echo "Copied and Built!"
+      - echo "Copied and Built!"s
     silent: True
 
 

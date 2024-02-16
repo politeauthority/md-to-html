@@ -3,10 +3,7 @@ kind: Kustomization
 resources:
   - ../../base/
   - ingress.yaml
-patches:
-  - target:
-      kind: Deployment
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/image
-        value: harbor.squid-ink.us/politeauthority/md-to-html:0.0.1g
+images:
+- name: politeauthority/md-to-html
+  newName: harbor.squid-ink.us/politeauthority/md-to-html
+  newTag: 0.0.11

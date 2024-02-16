@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: md-to-html
-        image: harbor.squid-ink.us/politeauthority/md-to-html:latest
+        image: politeauthority/md-to-html
         imagePullPolicy: Always
         ports:
         - containerPort: 80

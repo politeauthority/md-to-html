@@ -13,9 +13,10 @@ from . import obsidian_parser
 
 class ExportMarkdown:
 
-    def __init__(self, config: dict, md_files: dict):
+    def __init__(self, config: dict, md_files: dict, toc: dict):
         self.config = config
         self.md_files = md_files
+        self.toc = toc
         self.environment = jinja2.Environment(
             loader=jinja2.FileSystemLoader(
                 os.path.join(
@@ -23,6 +24,8 @@ class ExportMarkdown:
                     self.config["export"]["template"]["name"])))
 
     def run(self):
+        """Export Markdown entrypoint.
+        """
         print("Running export with template: %s" % self.config["export"]["template"]["name"])
         self.clean_export_path()
         for file_path, file_info in self.md_files.items():
@@ -103,6 +106,7 @@ class ExportMarkdown:
         template = self.environment.get_template("table_of_contents.html")
         the_files = []
 
+
         for file_name, file_info in self.md_files.items():
             tpl_file_info = {
                 "name": misc.filter_md_ext(file_info["name"]),
@@ -111,14 +115,17 @@ class ExportMarkdown:
             the_files.append(tpl_file_info)
         data = {
             "files": the_files,
-            "asset_path": "./assets"
+            "asset_path": "./assets",
+            "index_path": "./index.html",
+            "date_generated": misc.get_date_generated(),
+            "date_updated": misc.get_date_updated(),
+            "toc": self.toc
         }
         phile_content = template.render(**data)
         phile_info = {
             "name": "Index",
             "relative_path": "index.md",
-            "date_updated": misc.get_date_updated(),
-            "export_path": os.path.join(self.config["export"]["path"], "index.html")
+            "export_path": os.path.join(self.config["export"]["path"], "index.html"),
         }
         self.write_file(phile_info, phile_content)
         return True

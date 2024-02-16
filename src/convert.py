@@ -31,6 +31,7 @@ class Convert:
     def run(self):
         self.get_files()
         self.filter_files()
+        self.create_toc()
         self.convert_files()
 
     def get_files(self) -> bool:
@@ -81,8 +82,29 @@ class Convert:
             print("Error can only handle includes right now")
             exit(1)
 
+    def create_toc(self):
+        """Creates the table of contents for the export.
+        @todo: This is incredibly brittle and will break on directories deeper than 1 folder.
+        """
+        toc = {}
+        dit = {}
+        if self.config["files"]["vaultRoot"]:
+            files_list = []
+            vault_root = self.config["files"]["vaultRoot"]
+
+            for file_path, file_info in self.md_files.items():
+                new_loc = file_path.replace(vault_root + "/", "")
+                files_list.append(new_loc)
+
+            for item in files_list:
+                p = toc
+                for x in item.split('/'):
+                    p = p.setdefault(x, {})
+        self.toc = toc
+        return True
+
     def convert_files(self):
-        exported = ExportMarkdown(self.config, self.md_files).run()
+        exported = ExportMarkdown(self.config, self.md_files, self.toc).run()
 
     def _filter_vault_root(self):
         vault_root = self.config["files"]["vaultRoot"]

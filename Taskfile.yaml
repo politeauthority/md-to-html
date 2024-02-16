@@ -1,30 +1,26 @@
 version: '3'
+
+vars:
+  VAULT_EXPORT_DIR: "/Users/alix/Programming/repos/md-to-html/exports"
+  GREEN_MACHINE_DIR: "/home/kube/repos/md-to-html/"
+
+
 tasks:
 
   cp-vault-to-build:
     cmds:
       - |
-        scp -r /Users/alix/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Alix-Vault green-machine.ts:/home/kube/obsidian-valut
+        ssh green-machine.ts rm -rf /home/kube/repos/md-to-html/exports
+        scp -r {{.VAULT_EXPORT_DIR}} green-machine.ts:/home/kube/repos/md-to-html/
+        scp version.txt green-machine.ts:/home/kube/repos/md-to-html/
 
   cp-src-to-build:
     desc: "Copies Source and Taskfile to build box"
     cmds:
       - |
-        GLOBIGNORE='.git/'
-        scp -r /Users/alix/Programming/repos/md-to-html/src green-machine.ts:/home/kube/repos/md-to-html/
-        scp -r templates green-machine.ts:/home/kube/repos/md-to-html/templates
+        # scp -r /Users/alix/Programming/repos/md-to-html/src green-machine.ts:/home/kube/repos/md-to-html/
+        # scp -r templates green-machine.ts:/home/kube/repos/md-to-html/templates
         scp -r Taskfile.yaml green-machine.ts:/home/kube/repos/md-to-html/
-
-  cp-export-to-build:
-    cmds:
-      - |
-        GLOBIGNORE='.git/'
-        scp -r /Users/alix/Programming/repos/md-to-html/exports/ green-machine.ts:/home/kube/repos/md-to-html/exports
-
-  cp-build:
-    cmds:
-    - task: cp-vault-to-build
-    - task: cp-src-to-build
 
   dev-deploy:
     cmds:
@@ -35,21 +31,58 @@ tasks:
   dev-cp:
     cmds:
       - |
-        python3 src/convert.py
+        # python3 src/convert.py
         POD=$(kubectl get pods -n docs-dev  -l app=md-to-html --no-headers --field-selector=status.phase=Running | cut -d' ' -f1)
         echo $POD
         kubectl cp -n docs-dev  exports/ ${POD}:/usr/share/nginx/exports
         kubectl exec -n docs-dev -it ${POD} -- rm -rf /usr/share/nginx/html
         kubectl exec -n docs-dev -it ${POD} -- mv /usr/share/nginx/exports /usr/share/nginx/html
-      - echo "Copied and Built!"s
+      - echo "Copied and Built!"
+      - open https://docs-dev.alix.lol
     silent: True
 
+  update-kustomize-tag:
+    cmds:
+      - |
+        new_tag=$(cat version.txt)
+        # Check if a new tag value was provided
+        if [ -z "$new_tag" ]; then
+          echo "Error: Please provide a new tag value as an argument to the script."
+          exit 1
+        fi
+        sed -i -e "s/newTag:.*/newTag: ${new_tag}/g" kubernetes-manifests/envs/prod/kustomization.yaml
+        echo "Kustomization file updated with new tag: $new_tag"
+
+  update-version-tag:
+    cmds:
+     - |
+        python3 src/semver.py
+
+
+  full-deploy:
+    cmds:
+      - task update-version-tag
+      - task update-kustomize-tag
+      - task cp-vault-to-build
+      - task cp-src-to-build
+      - ssh green-machine.ts 'cd /home/kube/repos/md-to-html/; task image-run;'
+      - task prod-deploy
+
+
+  dev-exec:
+    cmds:
+     - |
+        POD=$(kubectl get pods -n docs-dev  -l app=md-to-html --no-headers --field-selector=status.phase=Running | cut -d' ' -f1)
+        echo $POD
+        kubectl exec -n docs-dev -it ${POD} -- bash
 
   prod-deploy:
     cmds:
       - |
         cd kubernetes-manifests/envs/prod
         kustomize build . | kubectl apply -n docs -f -
+        kubectl get pods -n docs
+        open https://docs.alix.lol/tech
 
   convert:
     cmds:
@@ -63,35 +96,18 @@ tasks:
         rm -rf docker/content
         cp -r ./exports docker/content
         cd  docker
-        docker build . -t md-to-html:{{.CLI_ARGS}}
+        VERSION="$(cat {{.GREEN_MACHINE_DIR}}/version.txt)"
+        docker build . -t md-to-html:${VERSION}
 
   image-push:
     cmds:
       - |
-        docker tag md-to-html:{{.CLI_ARGS}} harbor.squid-ink.us/politeauthority/md-to-html:{{.CLI_ARGS}}
-        docker push harbor.squid-ink.us/politeauthority/md-to-html:{{.CLI_ARGS}}
+        VERSION="$(cat {{.GREEN_MACHINE_DIR}}/version.txt)"
+        docker tag md-to-html:$VERSION harbor.squid-ink.us/politeauthority/md-to-html:${VERSION}
+        docker push harbor.squid-ink.us/politeauthority/md-to-html:${VERSION}
 
-  image-build-box:
+  image-run:
     cmds:
     - task: image-build
     - task: image-push
-
-  all:
-    cmds:
-    # - task: cp-vault-to-build
-    # - task: cp-src-to-build
-    - |
-      echo -n > "cd /home/kube/repos/md-to-html\n" > local_script.sh
-      echo "task image-push --  dev-0.0.1g" >> local_script.sh
-      chmod +x local_script.sh
-
-      ssh green-machine.ts \
-      'bash -s' < local_script.sh
-      #   cd /home/kube/repos/md-to-html & task image-build -- dev-0.0.1g
-      # ssh green-machine.ts \
-      #   cd /home/kube/repos/md-to-html &&
-      #   task image-push --  dev-0.0.1g
-  # - task: convert
-  # - task: image-build
-  # - task: image-push
 

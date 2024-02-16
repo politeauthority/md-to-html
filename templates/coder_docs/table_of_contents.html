@@ -7,6 +7,15 @@
         </section><!--//docs-intro--> #}
     </header>
     <section class="docs-section" id="item-9-1">
+        {# {{toc}}
+        <ul>
+        {%for root, phile_info in toc.items() %}
+            <li>
+                <a href="">{{phile_info}}</a>
+            </li>
+        {%endfor%}
+        </ul> #}
+
         <ul>
         {%for phile in files%}
             <li>

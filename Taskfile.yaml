@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  VAULT_EXPORT_DIR: "/Users/alix/Programming/repos/md-to-html/exports"
+  VAULT_EXPORT_DIR: "/Users/alix/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/vault-exports/pub-docs"
   GREEN_MACHINE_DIR: "/home/kube/repos/md-to-html/"
 
 
@@ -11,7 +11,8 @@ tasks:
     cmds:
       - |
         ssh green-machine.ts rm -rf /home/kube/repos/md-to-html/exports
-        scp -r {{.VAULT_EXPORT_DIR}} green-machine.ts:/home/kube/repos/md-to-html/
+        scp -r "{{.VAULT_EXPORT_DIR}}" green-machine.ts:/home/kube/repos/md-to-html/new_docs
+        ssh green-machine.ts mv /home/kube/repos/md-to-html/new_docs /home/kube/repos/md-to-html/exports
         scp version.txt green-machine.ts:/home/kube/repos/md-to-html/
 
   cp-src-to-build:
@@ -58,8 +59,12 @@ tasks:
      - |
         python3 src/semver.py
 
+  export-clean:
+    cmds:
+      - |
+        rm -rf ./exports/*
 
-  full-deploy:
+  deploy:
     cmds:
       - task update-version-tag
       - task update-kustomize-tag
@@ -68,13 +73,18 @@ tasks:
       - ssh green-machine.ts 'cd /home/kube/repos/md-to-html/; task image-run;'
       - task prod-deploy
 
-
   dev-exec:
     cmds:
      - |
         POD=$(kubectl get pods -n docs-dev  -l app=md-to-html --no-headers --field-selector=status.phase=Running | cut -d' ' -f1)
         echo $POD
         kubectl exec -n docs-dev -it ${POD} -- bash
+  prod-exec:
+    cmds:
+     - |
+        POD=$(kubectl get pods -n docs  -l app=md-to-html --no-headers --field-selector=status.phase=Running | cut -d' ' -f1)
+        echo $POD
+        kubectl exec -n docs -it ${POD} -- bash
 
   prod-deploy:
     cmds:
@@ -82,7 +92,8 @@ tasks:
         cd kubernetes-manifests/envs/prod
         kustomize build . | kubectl apply -n docs -f -
         kubectl get pods -n docs
-        open https://docs.alix.lol/tech
+        sleep 5
+        open https://docs.alix.lol/databases/postgres.html
 
   convert:
     cmds:

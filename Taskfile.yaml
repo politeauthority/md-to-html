@@ -64,7 +64,7 @@ tasks:
       - |
         rm -rf ./exports/*
 
-  deploy:
+  release:
     cmds:
       - task update-version-tag
       - task update-kustomize-tag

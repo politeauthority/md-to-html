@@ -6,4 +6,4 @@ resources:
 images:
 - name: politeauthority/md-to-html
   newName: harbor.squid-ink.us/politeauthority/md-to-html
-  newTag: 0.0.33
+  newTag: 0.0.35
